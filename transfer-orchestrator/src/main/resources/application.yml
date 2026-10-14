@@ -1,0 +1,15 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: transfer-orchestrator
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    locations: classpath:db/orchestrator
+lab:
+  assignment: "06"
+  core-url: http://localhost:8080
+  validation-url: http://localhost:8083
+  http-timeout-millis: 1000
+  retry-limit: 3

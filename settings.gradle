@@ -1,0 +1,25 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'core-banking-lab'
+
+include(
+    'banking-domain',
+    'banking-application',
+    'banking-infrastructure',
+    'banking-api',
+    'banking-lab-tests',
+    'transfer-orchestrator',
+    'banking-projections'
+)

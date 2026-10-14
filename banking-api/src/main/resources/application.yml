@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: core-banking-lab
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false

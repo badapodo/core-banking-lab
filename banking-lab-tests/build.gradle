@@ -1,0 +1,150 @@
+dependencies {
+    testImplementation project(':banking-api')
+    testImplementation project(':banking-domain')
+    testImplementation project(':banking-application')
+    testImplementation project(':transfer-orchestrator')
+    testImplementation project(':banking-projections')
+    testImplementation libs.spring.boot.starter.web
+    testImplementation libs.spring.jdbc
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.spring.kafka
+    testImplementation libs.assertj.core
+    testImplementation libs.testcontainers.junit
+    testImplementation libs.testcontainers.postgresql
+    testImplementation libs.testcontainers.kafka
+    testImplementation libs.awaitility
+    testImplementation libs.wiremock
+    testImplementation libs.archunit
+    testRuntimeOnly libs.postgresql
+}
+
+def registry = rootProject.file('lab-steps.csv').readLines('UTF-8').drop(1).findAll { it.trim() }.collect {
+    def fields = it.split(',', 3)
+    [step: fields[0], testClass: fields[1], scenario: fields[2]]
+}
+if (registry.collect { it.step }.toSet().size() != registry.size() ||
+        registry.collect { it.testClass }.toSet().size() != registry.size()) {
+    throw new GradleException('Duplicate step or test class in lab-steps.csv')
+}
+registry.each { row ->
+    if (!file("src/test/java/${row.testClass.replace('.', '/')}.java").exists()) {
+        throw new GradleException("Registered test source missing: ${row.step}")
+    }
+}
+def discovered = fileTree('src/test/java') { include '**/assignment*/A*Step*Test.java' }.files.collect {
+    it.name.replace('.java', '')
+}.toSet()
+if (discovered != registry.collect { it.testClass.tokenize('.').last() }.toSet()) {
+    throw new GradleException('Step registry and step test sources differ')
+}
+def active = new Properties()
+rootProject.file('lab.properties').withInputStream { active.load(it) }
+def upper = providers.gradleProperty('labThrough').orElse(active.getProperty('activeAssignment')).get()
+if (!(upper ==~ /\d{1,2}/) || upper.toInteger() < 1 || upper.toInteger() > 12) {
+    throw new GradleException('labThrough and activeAssignment must be 01..12')
+}
+def fingerprint = {
+    def digest = java.security.MessageDigest.getInstance('SHA-256')
+    rootProject.fileTree('.') {
+        include '**/*.java', '**/*.gradle', '**/src/main/resources/**', 'gradle/libs.versions.toml',
+                'lab-steps.csv', 'lab.properties', 'scripts/**'
+        exclude '**/build/**', '.gradle/**'
+    }.files.sort { it.path }.each {
+        digest.update(it.path.getBytes('UTF-8'))
+        digest.update(it.bytes)
+    }
+    digest.digest().encodeHex().toString()
+}
+def selectedStep = providers.gradleProperty('labStep').orNull
+def selected = registry.findAll { it.step.substring(0, 2).toInteger() <= upper.toInteger() }
+
+tasks.named('test') {
+    enabled = false
+}
+def configureLabTest = { Test task, List rows, String tag ->
+    task.group = 'verification'
+    task.testClassesDirs = sourceSets.test.output.classesDirs
+    task.classpath = sourceSets.test.runtimeClasspath
+    task.maxParallelForks = 1
+    // Preserve A01 test sources while isolating their cached Spring contexts and container lifecycle.
+    task.forkEvery = 1
+    task.useJUnitPlatform { includeTags tag }
+    task.filter {
+        rows.each { includeTestsMatching it.testClass }
+        failOnNoMatchingTests = true
+    }
+    task.outputs.upToDateWhen { false }
+    task.systemProperty 'lab.runtimeClasspath', sourceSets.test.runtimeClasspath.asPath
+    def signature
+    task.doFirst {
+        if (rows.isEmpty()) throw new GradleException('No registered test targets selected')
+        logger.lifecycle("Lab targets (${rows.size()}): ${rows.collect { it.step ?: it.testClass }.join(', ')}")
+        signature = fingerprint()
+        systemProperty 'lab.classpath.core', project(':banking-api').sourceSets.main.runtimeClasspath.asPath
+        systemProperty 'lab.classpath.orchestrator', project(':transfer-orchestrator').sourceSets.main.runtimeClasspath.asPath
+        systemProperty 'lab.classpath.projections', project(':banking-projections').sourceSets.main.runtimeClasspath.asPath
+    }
+    task.afterTest { descriptor, result ->
+        def row = rows.find { it.testClass == descriptor.className }
+        if (row != null && row.step != null) {
+            def messages = result.exceptions.collect { it.toString() + '\n' + it.stackTrace.join('\n') }.join('\n')
+            def state = result.resultType.toString()
+            def outcome = state == 'SUCCESS' ? 'PASS' :
+                    state == 'SKIPPED' ? 'SKIPPED' :
+                    messages.contains('ENVIRONMENT_ERROR') || messages.contains('Could not find a valid Docker') ||
+                    messages.contains('Failed to load ApplicationContext') ? 'ENVIRONMENT_ERROR' :
+                    messages.contains('TODO: A') ? 'TODO_FAIL' : 'FUNCTIONAL_FAIL'
+            def resultFile = layout.buildDirectory.file("lab-results/${row.step}.properties").get().asFile
+            resultFile.parentFile.mkdirs()
+            def properties = new Properties()
+            properties.setProperty('outcome', outcome)
+            properties.setProperty('timestamp', java.time.Instant.now().toString())
+            properties.setProperty('fingerprint', signature)
+            properties.setProperty('test', descriptor.name)
+            resultFile.withOutputStream { properties.store(it, row.scenario) }
+        }
+    }
+    task.afterSuite { descriptor, result ->
+        if (descriptor.parent == null && result.testCount == 0) {
+            throw new GradleException('Zero tests executed; this is not a successful lab run')
+        }
+    }
+}
+
+tasks.register('environmentTest', Test) {
+    configureLabTest(delegate, [[testClass: 'com.corebanking.lab.environment.EnvironmentTest']], 'environment')
+}
+tasks.register('infrastructureTest', Test) {
+    configureLabTest(delegate, [[testClass: 'com.corebanking.lab.environment.InfrastructureEnvironmentTest']], 'infrastructure')
+    def infrastructure = providers.gradleProperty('labInfrastructure').orElse('10').get()
+    if (!(infrastructure ==~ /\d{1,2}/) || infrastructure.toInteger() < 2 || infrastructure.toInteger() > 12) {
+        throw new GradleException('labInfrastructure must be 02..12')
+    }
+    systemProperty 'lab.infrastructureAssignment', infrastructure
+}
+tasks.register('assignmentTest', Test) {
+    description = 'Run a registered step with -PlabStep=AA-SS.'
+    configureLabTest(delegate, registry.findAll { it.step == selectedStep }, 'assignment')
+}
+tasks.register('regressionTest', Test) {
+    description = 'Cumulative assignments 01..labThrough (default: activeAssignment).'
+    configureLabTest(delegate, selected, 'assignment')
+}
+tasks.register('initialFailureTest', Test) {
+    description = 'Run the first functional step of every assignment; expected TODO failures.'
+    configureLabTest(delegate, registry.findAll { it.step.endsWith('-01') }, 'assignment')
+}
+tasks.register('labStatus') {
+    group = 'verification'
+    doLast {
+        def signature = fingerprint()
+        selected.each { row ->
+            def resultFile = layout.buildDirectory.file("lab-results/${row.step}.properties").get().asFile
+            def result = new Properties()
+            if (resultFile.exists()) resultFile.withInputStream { result.load(it) }
+            def state = result.getProperty('outcome', 'NEVER_RUN')
+            if (resultFile.exists() && result.getProperty('fingerprint') != signature) state = "STALE(${state})"
+            println "${row.step} ${state.padRight(22)} ${result.getProperty('timestamp', '')} ${row.scenario}"
+        }
+    }
+}

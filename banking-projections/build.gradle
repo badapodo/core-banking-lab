@@ -1,0 +1,13 @@
+plugins {
+    alias(libs.plugins.spring.boot)
+}
+
+dependencies {
+    implementation project(':banking-domain')
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.jdbc
+    implementation libs.flyway.core
+    implementation libs.flyway.postgresql
+    runtimeOnly libs.postgresql
+    implementation libs.spring.kafka
+}

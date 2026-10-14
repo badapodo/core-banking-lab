@@ -1,0 +1,18 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: banking-projections
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    locations: classpath:db/projections
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+lab:
+  assignment: "08"
+  core-url: http://localhost:8080
+  events-topic: transfer-committed
+  audit-group: audit
+  notification-group: notifications

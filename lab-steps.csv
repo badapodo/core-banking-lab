@@ -1,0 +1,87 @@
+step,class,scenario
+01-01,com.corebanking.lab.assignment01.A01Step01Test,Create account
+01-02,com.corebanking.lab.assignment01.A01Step02Test,Initial state
+01-03,com.corebanking.lab.assignment01.A01Step03Test,Unique IDs
+01-04,com.corebanking.lab.assignment01.A01Step04Test,Persistence
+01-05,com.corebanking.lab.assignment01.A01Step05Test,Unknown account
+02-01,com.corebanking.lab.assignment02.A02Step01Test,정상 이체 및 조회
+02-02,com.corebanking.lab.assignment02.A02Step02Test,잔액 부족
+02-03,com.corebanking.lab.assignment02.A02Step03Test,존재하지 않는 계좌
+02-04,com.corebanking.lab.assignment02.A02Step04Test,동일 계좌
+02-05,com.corebanking.lab.assignment02.A02Step05Test,0원 및 음수
+02-06,com.corebanking.lab.assignment02.A02Step06Test,잔액 기록 실패 시 전체 롤백
+02-07,com.corebanking.lab.assignment02.A02Step07Test,다수 이체 전후 자금 보존
+03-01,com.corebanking.lab.assignment03.A03Step01Test,정상 이체의 원장 기록
+03-02,com.corebanking.lab.assignment03.A03Step02Test,거래별 차변·대변 일치
+03-03,com.corebanking.lab.assignment03.A03Step03Test,원장 쓰기 실패 시 전체 롤백
+03-04,com.corebanking.lab.assignment03.A03Step04Test,확정 거래별 정확히 한 원장 쌍
+03-05,com.corebanking.lab.assignment03.A03Step05Test,거래 내역 조회
+03-06,com.corebanking.lab.assignment03.A03Step06Test,원장 불변성
+03-07,com.corebanking.lab.assignment03.A03Step07Test,초기 자금과 원장 대사
+04-01,com.corebanking.lab.assignment04.A04Step01Test,동일 계좌 동시 출금
+04-02,com.corebanking.lab.assignment04.A04Step02Test,총 요청액이 잔액 초과
+04-03,com.corebanking.lab.assignment04.A04Step03Test,반대 방향 동시 이체
+04-04,com.corebanking.lab.assignment04.A04Step04Test,다수 계좌 순환 이체
+04-05,com.corebanking.lab.assignment04.A04Step05Test,Lost Update 방지
+04-06,com.corebanking.lab.assignment04.A04Step06Test,경합 후 진행 가능성
+04-07,com.corebanking.lab.assignment04.A04Step07Test,병렬 처리 후 자금·원장 정합성
+04-08,com.corebanking.lab.assignment04.A04Step08Test,PostgreSQL deadlock 오류 후 재시도
+05-01,com.corebanking.lab.assignment05.A05Step01Test,동일 키·동일 요청
+05-02,com.corebanking.lab.assignment05.A05Step02Test,동일 키·다른 요청 충돌
+05-03,com.corebanking.lab.assignment05.A05Step03Test,동시 중복 요청
+05-04,com.corebanking.lab.assignment05.A05Step04Test,클라이언트가 응답을 잃은 후 재시도
+05-05,com.corebanking.lab.assignment05.A05Step05Test,실제 프로세스 재시작 후 재시도
+05-06,com.corebanking.lab.assignment05.A05Step06Test,멱등성 기록 실패 시 금융 롤백
+06-01,com.corebanking.lab.assignment06.A06Step01Test,독립 서비스의 기존 이체 계약
+06-02,com.corebanking.lab.assignment06.A06Step02Test,Core HTTP 호출 확인
+06-03,com.corebanking.lab.assignment06.A06Step03Test,Core 서비스 오류
+06-04,com.corebanking.lab.assignment06.A06Step04Test,연결 실패
+06-05,com.corebanking.lab.assignment06.A06Step05Test,호출 타임아웃
+06-06,com.corebanking.lab.assignment06.A06Step06Test,Core 커밋 후 응답 유실
+06-07,com.corebanking.lab.assignment06.A06Step07Test,서비스 경계의 중복 요청
+06-08,com.corebanking.lab.assignment06.A06Step08Test,DB 접근 권한 및 모듈 경계
+07-01,com.corebanking.lab.assignment07.A07Step01Test,정상 상태 전이와 금융 효과
+07-02,com.corebanking.lab.assignment07.A07Step02Test,수취인 검증 실패
+07-03,com.corebanking.lab.assignment07.A07Step03Test,검증 타임아웃
+07-04,com.corebanking.lab.assignment07.A07Step04Test,Core 호출 실패
+07-05,com.corebanking.lab.assignment07.A07Step05Test,커밋 응답 유실 후 결과 확인
+07-06,com.corebanking.lab.assignment07.A07Step06Test,동시 중복 Saga
+07-07,com.corebanking.lab.assignment07.A07Step07Test,완료 상태 영속성
+07-08,com.corebanking.lab.assignment07.A07Step08Test,재시작 후 미완료 Saga 복구
+07-09,com.corebanking.lab.assignment07.A07Step09Test,후속 업무 실패가 확정 거래를 취소하지 않음
+08-01,com.corebanking.lab.assignment08.A08Step01Test,확정 이벤트 발행
+08-02,com.corebanking.lab.assignment08.A08Step02Test,정상 소비
+08-03,com.corebanking.lab.assignment08.A08Step03Test,중복 소비
+08-04,com.corebanking.lab.assignment08.A08Step04Test,소비 도중 DB 장애
+08-05,com.corebanking.lab.assignment08.A08Step05Test,미소비 이벤트 재전달
+08-06,com.corebanking.lab.assignment08.A08Step06Test,역순 이벤트
+08-07,com.corebanking.lab.assignment08.A08Step07Test,소비자 재시작 후 중복 효과 방지
+08-08,com.corebanking.lab.assignment08.A08Step08Test,독립 소비자 그룹
+09-01,com.corebanking.lab.assignment09.A09Step01Test,이체와 Outbox 동시 커밋
+09-02,com.corebanking.lab.assignment09.A09Step02Test,Outbox 기록 실패 시 전체 롤백
+09-03,com.corebanking.lab.assignment09.A09Step03Test,DB 커밋 후 프로세스 종료
+09-04,com.corebanking.lab.assignment09.A09Step04Test,Kafka 일시 장애 복구
+09-05,com.corebanking.lab.assignment09.A09Step05Test,미완료 이벤트 재발행
+09-06,com.corebanking.lab.assignment09.A09Step06Test,중복 발행에도 소비 효과 한 번
+09-07,com.corebanking.lab.assignment09.A09Step07Test,Outbox 처리 상태 복구
+10-01,com.corebanking.lab.assignment10.A10Step01Test,Orchestrator 재시작
+10-02,com.corebanking.lab.assignment10.A10Step02Test,Kafka 소비자 재시작
+10-03,com.corebanking.lab.assignment10.A10Step03Test,DB 연결 종료 후 복구
+10-04,com.corebanking.lab.assignment10.A10Step04Test,서비스 네트워크 단절
+10-05,com.corebanking.lab.assignment10.A10Step05Test,미확정 응답 중 프로세스 강제 종료
+10-06,com.corebanking.lab.assignment10.A10Step06Test,장시간 미완료 작업 탐지
+10-07,com.corebanking.lab.assignment10.A10Step07Test,재시도 한도 초과
+10-08,com.corebanking.lab.assignment10.A10Step08Test,운영자 개입 거래 식별
+11-01,com.corebanking.lab.assignment11.A11Step01Test,금융 잔액·원장 대사
+11-02,com.corebanking.lab.assignment11.A11Step02Test,확정 거래·Outbox 누락 탐지
+11-03,com.corebanking.lab.assignment11.A11Step03Test,이벤트·소비 기록 대사
+11-04,com.corebanking.lab.assignment11.A11Step04Test,감사 데이터 누락 탐지
+11-05,com.corebanking.lab.assignment11.A11Step05Test,중복 파생 효과 탐지
+11-06,com.corebanking.lab.assignment11.A11Step06Test,누락 파생 데이터 재처리
+11-07,com.corebanking.lab.assignment11.A11Step07Test,대사·복구 재실행 멱등성
+12-01,com.corebanking.lab.assignment12.A12Step01Test,외부 데이터 없는 합성 워크로드
+12-02,com.corebanking.lab.assignment12.A12Step02Test,동일 seed의 재현 가능한 매핑
+12-03,com.corebanking.lab.assignment12.A12Step03Test,측정 지표 계약
+12-04,com.corebanking.lab.assignment12.A12Step04Test,부하 후 금융 정합성
+12-05,com.corebanking.lab.assignment12.A12Step05Test,외부 데이터 미제공 시 명시적 오류
+12-06,com.corebanking.lab.assignment12.A12Step06Test,합성 데이터 어댑터와 생성기 계약
